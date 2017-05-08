@@ -5,11 +5,18 @@ using Akka.Streams.Dsl;
 
 namespace Akka.Persistence.Query.RocksDb
 {
-    public class RocksDbReadJournal : IReadJournal
+    public class RocksDbReadJournal : IReadJournal, IAllPersistenceIdsQuery, ICurrentPersistenceIdsQuery
     {
         private readonly TimeSpan _refreshInterval;
         private readonly string _writeJournalPluginId;
         private readonly int _maxBufferSize;
+
+        public static string Identifier = "akka.persistence.query.journal.rocksdb";
+
+        public static Config DefaultConfiguration()
+        {
+           return ConfigurationFactory.FromResource<RocksDbReadJournal>("Akka.Persistence.Query.RocksDb.reference.conf");
+        }
 
         public RocksDbReadJournal(ExtendedActorSystem system, Config config)
         {
@@ -18,7 +25,8 @@ namespace Akka.Persistence.Query.RocksDb
             _maxBufferSize = config.GetInt("max-buffer-size");
         }
 
-        public Source<string, NotUsed> PersistenceIds() =>
+        // TODO: should be PersistenceIds
+        public Source<string, NotUsed> AllPersistenceIds() =>
             // no polling for this query, the write journal will push all changes, i.e. no refreshInterval
             Source.ActorPublisher<string>(AllPersistenceIdsPublisher.Props(true, _writeJournalPluginId))
                 .MapMaterializedValue(_ => NotUsed.Instance)
