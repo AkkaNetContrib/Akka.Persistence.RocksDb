@@ -5,7 +5,14 @@ using Akka.Streams.Dsl;
 
 namespace Akka.Persistence.Query.RocksDb
 {
-    public class RocksDbReadJournal : IReadJournal, IAllPersistenceIdsQuery, ICurrentPersistenceIdsQuery
+    public class RocksDbReadJournal : 
+        IReadJournal,
+        IAllPersistenceIdsQuery,
+        ICurrentPersistenceIdsQuery,
+        IEventsByPersistenceIdQuery,
+        ICurrentEventsByPersistenceIdQuery,
+        IEventsByTagQuery,
+        ICurrentEventsByTagQuery
     {
         private readonly TimeSpan _refreshInterval;
         private readonly string _writeJournalPluginId;

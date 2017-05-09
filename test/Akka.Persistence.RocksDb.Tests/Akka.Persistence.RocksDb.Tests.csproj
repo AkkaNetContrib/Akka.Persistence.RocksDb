@@ -121,6 +121,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\RocksDbAllPersistenceIdsSpec.cs" />
+    <Compile Include="Query\RocksDbEventsByPersistenceIdSpec.cs" />
+    <Compile Include="Query\RocksDbEventsByTagSpec.cs" />
     <Compile Include="RocksDbJournalTests.cs" />
     <Compile Include="TestKit\TestActor.cs" />
   </ItemGroup>

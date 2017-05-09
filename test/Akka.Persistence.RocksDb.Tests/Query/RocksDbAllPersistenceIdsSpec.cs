@@ -5,10 +5,10 @@ using Akka.Persistence.Query;
 using Akka.Persistence.Query.RocksDb;
 using Akka.Streams;
 using Akka.Streams.TestKit;
-using Akka.Util.Internal;
 using FluentAssertions;
 using Xunit;
 using Akka.Actor;
+using Akka.Util.Internal;
 
 namespace Akka.Persistence.RocksDb.Tests.Query
 {
@@ -25,7 +25,7 @@ namespace Akka.Persistence.RocksDb.Tests.Query
                 auto-initialize = on
                 path = rocks_pid_{id}.db
             }}
-            akka.test.single-expect-default = 10s")
+            akka.test.single-expect-default = 3s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());
 
 
@@ -40,7 +40,7 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         public void Sql_query_AllPersistenceIds_should_implement_standard_AllPersistenceIdsQuery()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            (queries is IAllPersistenceIdsQuery).Should().BeTrue();
+            queries.Should().BeAssignableTo<IAllPersistenceIdsQuery>();
         }
 
         [Fact]
