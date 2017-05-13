@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Akka.Persistence.RocksDb.Tests.Query
 {
-    public abstract class EventsByTagSpec : Akka.TestKit.Xunit2.TestKit
+    public class EventsByTagSpec : Akka.TestKit.Xunit2.TestKit
     {
         public static readonly AtomicCounter Counter = new AtomicCounter(0);
 
@@ -44,14 +44,14 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_query_EventsByTag_should_implement_standard_EventsByTagQuery()
+        public void RocksDb_query_EventsByTag_should_implement_standard_EventsByTagQuery()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             queries.Should().BeAssignableTo<IEventsByTagQuery>();
         }
 
         [Fact]
-        public void Sql_query_EventsByTag_should_find_existing_events()
+        public void RocksDb_query_EventsByTag_should_find_existing_events()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             var a = SetupEmpty("a");
@@ -86,10 +86,10 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_query_EventsByTag_should_not_see_new_events_after_demand_request()
+        public void RocksDb_query_EventsByTag_should_not_see_new_events_after_demand_request()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            Sql_query_EventsByTag_should_find_existing_events();
+            RocksDb_query_EventsByTag_should_find_existing_events();
 
             var c = SetupEmpty("c");
             var greenSrc = queries.CurrentEventsByTag("green", offset: 0);
@@ -109,10 +109,10 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_query_EventsByTag_should_find_events_from_offset()
+        public void RocksDb_query_EventsByTag_should_find_events_from_offset()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            Sql_query_EventsByTag_should_not_see_new_events_after_demand_request();
+            RocksDb_query_EventsByTag_should_not_see_new_events_after_demand_request();
 
             var greenSrc = queries.CurrentEventsByTag("green", offset: 2);
             var probe = greenSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
@@ -124,10 +124,10 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_live_query_EventsByTag_should_find_new_events()
+        public void RocksDb_live_query_EventsByTag_should_find_new_events()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            Sql_query_EventsByTag_should_find_events_from_offset();
+            RocksDb_query_EventsByTag_should_find_events_from_offset();
 
             var d = SetupEmpty("d");
 
@@ -149,10 +149,10 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_live_query_EventsByTag_should_find_events_from_offset()
+        public void RocksDb_live_query_EventsByTag_should_find_events_from_offset()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            Sql_live_query_EventsByTag_should_find_new_events();
+            RocksDb_live_query_EventsByTag_should_find_new_events();
 
             var greenSrc = queries.EventsByTag("green", offset: 2);
             var probe = greenSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);

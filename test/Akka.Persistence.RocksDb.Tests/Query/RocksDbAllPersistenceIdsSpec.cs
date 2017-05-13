@@ -37,14 +37,14 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_query_AllPersistenceIds_should_implement_standard_AllPersistenceIdsQuery()
+        public void RocksDb_query_AllPersistenceIds_should_implement_standard_AllPersistenceIdsQuery()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             queries.Should().BeAssignableTo<IAllPersistenceIdsQuery>();
         }
 
         [Fact]
-        public void Sql_query_AllPersistenceIds_should_find_existing_persistence_ids()
+        public void RocksDb_query_AllPersistenceIds_should_find_existing_persistence_ids()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             Sys.ActorOf(TestKit.TestActor.Props("a")).Tell("a1");
@@ -63,7 +63,7 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         }
 
         [Fact]
-        public void Sql_query_AllPersistenceIds_should_find_new_persistence_ids()
+        public void RocksDb_query_AllPersistenceIds_should_find_new_persistence_ids()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             Sys.ActorOf(TestKit.TestActor.Props("a")).Tell("a1");
