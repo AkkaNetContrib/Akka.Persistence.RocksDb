@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Akka.Actor;
 using Akka.Configuration;
 using Akka.Streams.Dsl;
@@ -44,24 +45,24 @@ namespace Akka.Persistence.Query.RocksDb
                 .MapMaterializedValue(_ => NotUsed.Instance)
                 .Named("CurrentPersistenceIds");
 
-        public Source<EventEnvelope, NotUsed> EventsByPersistenceId(string persistenceId, long fromSequenceNr, long toSequenceNr) =>
+        public Source<EventEnvelope, NotUsed> EventsByPersistenceId(string persistenceId, long fromSequenceNr = 0L, long toSequenceNr = long.MaxValue) =>
             Source.ActorPublisher<EventEnvelope>(EventsByPersistenceIdPublisher.Props(persistenceId, fromSequenceNr, toSequenceNr, _refreshInterval, _maxBufferSize, _writeJournalPluginId))
                 .MapMaterializedValue(_ => NotUsed.Instance)
-                .Named("EventsByPersistenceId-" + persistenceId);
+                .Named($"EventsByPersistenceId-{persistenceId}");
 
-        public Source<EventEnvelope, NotUsed> CurrentEventsByPersistenceId(string persistenceId, long fromSequenceNr, long toSequenceNr) =>
+        public Source<EventEnvelope, NotUsed> CurrentEventsByPersistenceId(string persistenceId, long fromSequenceNr = 0L, long toSequenceNr = long.MaxValue) =>
             Source.ActorPublisher<EventEnvelope>(EventsByPersistenceIdPublisher.Props(persistenceId, fromSequenceNr, toSequenceNr, null, _maxBufferSize, _writeJournalPluginId))
                 .MapMaterializedValue(_ => NotUsed.Instance)
-                .Named("CurrentEventsByPersistenceId-" + persistenceId);
+                .Named($"CurrentEventsByPersistenceId-{persistenceId}");
 
-        public Source<EventEnvelope, NotUsed> EventsByTag(string tag, long offset) =>
+        public Source<EventEnvelope, NotUsed> EventsByTag(string tag, long offset = 0L) =>
             Source.ActorPublisher<EventEnvelope>(EventsByTagPublisher.Props(tag, offset, long.MaxValue, _refreshInterval, _maxBufferSize, _writeJournalPluginId))
                 .MapMaterializedValue(_ => NotUsed.Instance)
-                .Named("EventsByTag-" + tag);
+                .Named($"EventsByTag-{tag}");
 
-        public Source<EventEnvelope, NotUsed> CurrentEventsByTag(string tag, long offset) =>
+        public Source<EventEnvelope, NotUsed> CurrentEventsByTag(string tag, long offset = 0L) =>
             Source.ActorPublisher<EventEnvelope>(EventsByTagPublisher.Props(tag, offset, long.MaxValue, null, _maxBufferSize, _writeJournalPluginId))
                 .MapMaterializedValue(_ => NotUsed.Instance)
-                .Named("CurrentEventsByTag-" + tag);
+                .Named($"CurrentEventsByTag-{tag}");
     }
 }

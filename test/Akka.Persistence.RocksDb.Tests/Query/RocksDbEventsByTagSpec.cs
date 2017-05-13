@@ -33,7 +33,8 @@ namespace Akka.Persistence.RocksDb.Tests.Query
                 auto-initialize = on
                 path = rocks_tag_{id}.db
             }}
-            akka.test.single-expect-default = 3s")
+            akka.persistence.query.journal.rocksdb.refresh-interval = 1s
+            akka.test.single-expect-default = 10s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());
 
         private readonly ActorMaterializer _materializer;
@@ -54,8 +55,8 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         public void RocksDb_query_EventsByTag_should_find_existing_events()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            var a = SetupEmpty("a");
-            var b = SetupEmpty("b");
+            var a = Sys.ActorOf(TestKit.TestActor.Props("a"));
+            var b = Sys.ActorOf(TestKit.TestActor.Props("b"));
 
             a.Tell("hello");
             ExpectMsg("hello-done");
@@ -68,20 +69,20 @@ namespace Akka.Persistence.RocksDb.Tests.Query
             b.Tell("a green leaf");
             ExpectMsg("a green leaf-done");
 
-            var greenSrc = queries.CurrentEventsByTag("green", offset: 0);
+            var greenSrc = queries.CurrentEventsByTag("green", offset: 0L);
             var probe = greenSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
             probe.Request(2)
-                .ExpectNext(new EventEnvelope(2, "a", 2, "a green apple"))
-                .ExpectNext(new EventEnvelope(4, "a", 3, "a green banana"));
+                .ExpectNext(new EventEnvelope(1L, "a", 2L, "a green apple"))
+                .ExpectNext(new EventEnvelope(2L, "a", 3L, "a green banana"));
             probe.ExpectNoMsg(TimeSpan.FromMilliseconds(500));
             probe.Request(2)
-                .ExpectNext(new EventEnvelope(5, "b", 2, "a green leaf"))
-                .ExpectComplete();
+                .ExpectNext(new EventEnvelope(3L, "b", 2L, "a green leaf"))
+                .ExpectComplete();// TODO: Complete never raised
 
-            var blackSrc = queries.CurrentEventsByTag("black", offset: 0);
+            var blackSrc = queries.CurrentEventsByTag("black", offset: 0L);
             probe = blackSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
             probe.Request(5)
-                .ExpectNext(new EventEnvelope(3, "b", 1, "a black car"))
+                .ExpectNext(new EventEnvelope(1L, "b", 1L, "a black car"))
                 .ExpectComplete();
         }
 
@@ -91,12 +92,13 @@ namespace Akka.Persistence.RocksDb.Tests.Query
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             RocksDb_query_EventsByTag_should_find_existing_events();
 
-            var c = SetupEmpty("c");
-            var greenSrc = queries.CurrentEventsByTag("green", offset: 0);
+            var c = Sys.ActorOf(TestKit.TestActor.Props("c"));
+
+            var greenSrc = queries.CurrentEventsByTag("green", offset: 0L);
             var probe = greenSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
             probe.Request(2)
-                .ExpectNext(new EventEnvelope(2, "a", 2, "a green apple"))
-                .ExpectNext(new EventEnvelope(4, "a", 3, "a green banana"))
+                .ExpectNext(new EventEnvelope(1L, "a", 2L, "a green apple"))
+                .ExpectNext(new EventEnvelope(2L, "a", 3L, "a green banana"))
                 .ExpectNoMsg(TimeSpan.FromMilliseconds(100));
 
             c.Tell("a green cucumber");
@@ -104,8 +106,8 @@ namespace Akka.Persistence.RocksDb.Tests.Query
 
             probe.ExpectNoMsg(TimeSpan.FromMilliseconds(100));
             probe.Request(5)
-                .ExpectNext(new EventEnvelope(5, "b", 2, "a green leaf"))
-                .ExpectComplete();
+                .ExpectNext(new EventEnvelope(3L, "b", 2L, "a green leaf"))
+                .ExpectComplete(); // green cucumber not seen
         }
 
         [Fact]
@@ -114,12 +116,12 @@ namespace Akka.Persistence.RocksDb.Tests.Query
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             RocksDb_query_EventsByTag_should_not_see_new_events_after_demand_request();
 
-            var greenSrc = queries.CurrentEventsByTag("green", offset: 2);
+            var greenSrc = queries.CurrentEventsByTag("green", offset: 2L);
             var probe = greenSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
             probe.Request(10)
-                .ExpectNext(new EventEnvelope(4, "a", 3, "a green banana"))
-                .ExpectNext(new EventEnvelope(5, "b", 2, "a green leaf"))
-                .ExpectNext(new EventEnvelope(6, "c", 1, "a green cucumber"))
+                .ExpectNext(new EventEnvelope(2L, "a", 3L, "a green banana"))
+                .ExpectNext(new EventEnvelope(3L, "b", 2L, "a green leaf"))
+                .ExpectNext(new EventEnvelope(4L, "c", 1L, "a green cucumber"))
                 .ExpectComplete();
         }
 
@@ -127,14 +129,14 @@ namespace Akka.Persistence.RocksDb.Tests.Query
         public void RocksDb_live_query_EventsByTag_should_find_new_events()
         {
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
-            RocksDb_query_EventsByTag_should_find_events_from_offset();
+            //RocksDb_query_EventsByTag_should_find_events_from_offset(); // TODO: should we run it here?
 
-            var d = SetupEmpty("d");
+            var d = Sys.ActorOf(TestKit.TestActor.Props("d"));
 
-            var blackSrc = queries.EventsByTag("black", offset: 0);
+            var blackSrc = queries.EventsByTag("black", offset: 0L);
             var probe = blackSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
             probe.Request(2)
-                .ExpectNext(new EventEnvelope(3, "b", 1, "a black car"))
+                .ExpectNext(new EventEnvelope(1L, "b", 1L, "a black car"))
                 .ExpectNoMsg(TimeSpan.FromMilliseconds(100));
 
             d.Tell("a black dog");
@@ -142,10 +144,10 @@ namespace Akka.Persistence.RocksDb.Tests.Query
             d.Tell("a black night");
             ExpectMsg("a black night-done");
 
-            probe.ExpectNext(new EventEnvelope(7, "d", 1, "a black dog"))
+            probe.ExpectNext(new EventEnvelope(2L, "d", 1L, "a black dog")) // TODO: it returns EventEnvelope(1L, "b", 1L, "a black car") and stop after that
                 .ExpectNoMsg(TimeSpan.FromMilliseconds(100));
             probe.Request(10)
-                .ExpectNext(new EventEnvelope(8, "d", 2, "a black night"));
+                .ExpectNext(new EventEnvelope(3L, "d", 2L, "a black night"));
         }
 
         [Fact]
@@ -154,18 +156,13 @@ namespace Akka.Persistence.RocksDb.Tests.Query
             var queries = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
             RocksDb_live_query_EventsByTag_should_find_new_events();
 
-            var greenSrc = queries.EventsByTag("green", offset: 2);
+            var greenSrc = queries.EventsByTag("green", offset: 2L);
             var probe = greenSrc.RunWith(this.SinkProbe<EventEnvelope>(), _materializer);
             probe.Request(10)
-                .ExpectNext(new EventEnvelope(4, "a", 3L, "a green banana"))
-                .ExpectNext(new EventEnvelope(5, "b", 2L, "a green leaf"))
-                .ExpectNext(new EventEnvelope(6, "c", 1L, "a green cucumber"))
+                .ExpectNext(new EventEnvelope(2L, "a", 3L, "a green banana"))
+                .ExpectNext(new EventEnvelope(3L, "b", 2L, "a green leaf"))
+                .ExpectNext(new EventEnvelope(4L, "c", 1L, "a green cucumber"))
                 .ExpectNoMsg(TimeSpan.FromMilliseconds(100));
-        }
-
-        private IActorRef SetupEmpty(string persistenceId)
-        {
-            return Sys.ActorOf(TestKit.TestActor.Props(persistenceId));
         }
 
         protected override void Dispose(bool disposing)

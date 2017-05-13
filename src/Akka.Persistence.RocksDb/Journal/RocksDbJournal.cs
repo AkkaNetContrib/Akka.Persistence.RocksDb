@@ -59,14 +59,20 @@ namespace Akka.Persistence.RocksDb.Journal
                             {
                                 AdaptFromJournal(taggedMessage.Persistent).ForEach(adaptedPersistentRepr =>
                                 {
-                                    rtm.ReplyTo.Tell(new ReplayedTaggedMessage(adaptedPersistentRepr, rtm.Tag, taggedMessage.Offset));
+                                    rtm.ReplyTo.Tell(new ReplayedTaggedMessage(adaptedPersistentRepr, rtm.Tag,
+                                        taggedMessage.Offset));
                                 });
-                            });
-                        }
+                            }).Wait();
 
-                        return 4L;
-                    })
-                    .PipeTo(rtm.ReplyTo);
+                            return highSeqNr;
+                        }
+                    }).ContinueWith<IJournalResponse>(task =>
+                    {
+                        if (!task.IsFaulted && !task.IsCanceled)
+                            return new RecoverySuccess(task.Result);
+                        else
+                            return new ReplayMessagesFailure(task.Exception);
+                    }).PipeTo(rtm.ReplyTo);
             }
             else if (message is SubscribePersistenceId subscribePersistenceId)
             {
@@ -216,10 +222,9 @@ namespace Akka.Persistence.RocksDb.Journal
                 }
             }
 
-            WithIterator<NotUsed>(iter =>
+            WithIterator(iter =>
             {
-                // fromSequenceNr is exclusive, i.e. start with +1
-                var startKey = new Key(tagInt, fromSequenceNr < 1L ? 1L : fromSequenceNr + 1, 0);
+                var startKey = new Key(tagInt, fromSequenceNr < 1L ? 1L : fromSequenceNr, 0);
                 iter.Seek(KeyToBytes(startKey));
                 Go(iter, startKey, 0L, recoveryCallback);
 

@@ -24,92 +24,127 @@ namespace Akka.Persistence.Query.RocksDb
 
     internal abstract class AbstractEventsByTagPublisher : ActorPublisher<EventEnvelope>
     {
-        private ILoggingAdapter _log;
-
         protected readonly DeliveryBuffer<EventEnvelope> Buffer;
-        protected readonly IActorRef JournalRef;
-        protected long CurrentOffset;
+
         protected AbstractEventsByTagPublisher(string tag, long fromOffset, int maxBufferSize, string writeJournalPluginId)
         {
             Tag = tag;
-            CurrentOffset = FromOffset = fromOffset;
+            FromOffset = fromOffset;
             MaxBufferSize = maxBufferSize;
             WriteJournalPluginId = writeJournalPluginId;
-            Buffer = new DeliveryBuffer<EventEnvelope>(OnNext);
             JournalRef = Persistence.Instance.Apply(Context.System).JournalFor(writeJournalPluginId);
+            CurrentOffset = fromOffset;
+
+            Buffer = new DeliveryBuffer<EventEnvelope>(OnNext);
         }
 
-        protected ILoggingAdapter Log => _log ?? (_log = Context.GetLogger());
+        protected ILoggingAdapter Log { get; } = Context.GetLogger();
         protected string Tag { get; }
         protected long FromOffset { get; }
-        protected abstract long ToOffset { get; }
         protected int MaxBufferSize { get; }
         protected string WriteJournalPluginId { get; }
+        protected readonly IActorRef JournalRef;
+        protected long CurrentOffset;
+        protected long ToOffset { get; set; }
 
-        protected bool IsTimeForReplay => (Buffer.IsEmpty || Buffer.Length <= MaxBufferSize / 2) && (CurrentOffset <= ToOffset);
+        protected override bool Receive(object message)
+        {
+            return Init(message);
+        }
+
+        protected bool Init(object message)
+        {
+            switch (message)
+            {
+                case Request _:
+                    ReceiveInitialRequest();
+                    return true;
+                case EventsByPersistenceIdPublisher.Continue _:
+                    // skip, wait for first Request
+                    return true;
+                case Cancel _:
+                    Context.Stop(Self);
+                    return true;
+            }
+
+            return false;
+        }
 
         protected abstract void ReceiveInitialRequest();
+
+        protected bool Idle(object message)
+        {
+            switch (message)
+            {
+                case EventsByPersistenceIdPublisher.Continue _:
+                case TaggedEventAppended _:
+                    if (IsTimeForReplay) Replay();
+                    return true;
+                case Request _:
+                    ReceiveIdleRequest();
+                    return true;
+                case Cancel _:
+                    Context.Stop(Self);
+                    return true;
+            }
+
+            return false;
+        }
+
         protected abstract void ReceiveIdleRequest();
-        protected abstract void ReceiveRecoverySuccess(long highestSequenceNr);
 
-        protected override bool Receive(object message) => message.Match()
-            .With<Request>(_ => ReceiveInitialRequest())
-            .With<EventsByTagPublisher.Continue>(() => { })
-            .With<Cancel>(_ => Context.Stop(Self))
-            .WasHandled;
-
-        protected bool Idle(object message) => message.Match()
-            .With<EventsByTagPublisher.Continue>(() =>
-            {
-                if (IsTimeForReplay) Replay();
-            })
-            .With<TaggedEventAppended>(() =>
-            {
-                if (IsTimeForReplay) Replay();
-            })
-            .With<Request>(ReceiveIdleRequest)
-            .With<Cancel>(() => Context.Stop(Self))
-            .WasHandled;
+        protected bool IsTimeForReplay => (Buffer.IsEmpty || Buffer.Length <= MaxBufferSize / 2) && (CurrentOffset <= ToOffset);
 
         protected void Replay()
         {
             var limit = MaxBufferSize - Buffer.Length;
-            Log.Debug("request replay for tag [{0}] from [{1}] to [{2}] limit [{3}]", Tag, CurrentOffset, ToOffset, limit);
+            Log.Debug("Request replay for tag [{0}] from [{1}] to [{2}] limit [{3}]", Tag, CurrentOffset, ToOffset, limit);
             JournalRef.Tell(new ReplayTaggedMessages(CurrentOffset, ToOffset, limit, Tag, Self));
             Context.Become(Replaying(limit));
         }
 
         protected Receive Replaying(int limit)
         {
-            return message => message.Match()
-                .With<ReplayedTaggedMessage>(replayed =>
+            return message =>
+            {
+                switch (message)
                 {
-                    Buffer.Add(new EventEnvelope(
-                        offset: replayed.Offset,
-                        persistenceId: replayed.Persistent.PersistenceId,
-                        sequenceNr: replayed.Persistent.SequenceNr,
-                        @event: replayed.Persistent.Payload));
+                    case ReplayedTaggedMessage replayed:
+                        Buffer.Add(new EventEnvelope(
+                            offset: replayed.Offset,
+                            persistenceId: replayed.Persistent.PersistenceId,
+                            sequenceNr: replayed.Persistent.SequenceNr,
+                            @event: replayed.Persistent.Payload));
 
-                    CurrentOffset = replayed.Offset;
-                    Buffer.DeliverBuffer(TotalDemand);
-                })
-                .With<RecoverySuccess>(success =>
-                {
-                    Log.Debug("replay completed for tag [{0}], currOffset [{1}]", Tag, CurrentOffset);
-                    ReceiveRecoverySuccess(success.HighestSequenceNr);
-                })
-                .With<ReplayMessagesFailure>(failure =>
-                {
-                    Log.Debug("replay failed for tag [{0}], due to [{1}]", Tag, failure.Cause.Message);
-                    Buffer.DeliverBuffer(TotalDemand);
-                    OnErrorThenStop(failure.Cause);
-                })
-                .With<Request>(_ => Buffer.DeliverBuffer(TotalDemand))
-                .With<EventsByTagPublisher.Continue>(() => { })
-                .With<TaggedEventAppended>(() => { })
-                .With<Cancel>(() => Context.Stop(Self))
-                .WasHandled;
+                        CurrentOffset = replayed.Offset;
+                        Buffer.DeliverBuffer(TotalDemand);
+                        return true;
+                    case RecoverySuccess success:
+                        Log.Debug("Replay completed for tag [{0}], currentOffset [{1}]", Tag, CurrentOffset);
+                        ReceiveRecoverySuccess(success.HighestSequenceNr);
+                        return true;
+                    case ReplayMessagesFailure failure:
+                        Log.Debug("Replay failed for tag [{0}], due to [{1}]", Tag, failure.Cause.Message);
+                        Buffer.DeliverBuffer(TotalDemand);
+                        OnErrorThenStop(failure.Cause);
+                        return true;
+                    case Request _:
+                        Buffer.DeliverBuffer(TotalDemand);
+                        return true;
+                    case EventsByPersistenceIdPublisher.Continue _:
+                    case EventAppended _:
+                        // skip during replay
+                        return true;
+                    case Cancel _:
+                        Context.Stop(Self);
+                        return true;
+                }
+
+                return false;
+            };
         }
+
+        protected abstract void ReceiveRecoverySuccess(long highestSequenceNr);
     }
 
     internal sealed class LiveEventsByTagPublisher : AbstractEventsByTagPublisher
@@ -121,8 +156,6 @@ namespace Akka.Persistence.Query.RocksDb
             ToOffset = toOffset;
             _tickCancelable = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(refreshInterval, refreshInterval, Self, EventsByTagPublisher.Continue.Instance, Self);
         }
-
-        protected override long ToOffset { get; }
 
         protected override void PostStop()
         {
@@ -158,11 +191,9 @@ namespace Akka.Persistence.Query.RocksDb
         public CurrentEventsByTagPublisher(string tag, long fromOffset, long toOffset, int maxBufferSize, string writeJournalPluginId)
             : base(tag, fromOffset, maxBufferSize, writeJournalPluginId)
         {
-            _toOffset = toOffset;
+            ToOffset = toOffset;
         }
 
-        private long _toOffset;
-        protected override long ToOffset => _toOffset;
         protected override void ReceiveInitialRequest()
         {
             Replay();
@@ -181,12 +212,12 @@ namespace Akka.Persistence.Query.RocksDb
         {
             Buffer.DeliverBuffer(TotalDemand);
             if (highestSequenceNr < ToOffset)
-                _toOffset = highestSequenceNr;
+                ToOffset = highestSequenceNr;
 
-            if (Buffer.IsEmpty && CurrentOffset > ToOffset)
+            if (Buffer.IsEmpty && (CurrentOffset > ToOffset || CurrentOffset == FromOffset))
                 OnCompleteThenStop();
             else
-                Self.Tell(EventsByTagPublisher.Continue.Instance);
+                Self.Tell(EventsByTagPublisher.Continue.Instance); // more to fetch
 
             Context.Become(Idle);
         }
