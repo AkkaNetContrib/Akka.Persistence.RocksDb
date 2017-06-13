@@ -55,20 +55,21 @@ namespace Akka.Persistence.RocksDb.Journal
                         }
                         else
                         {
-                            ReplayTaggedMessagesAsync(rtm.Tag, rtm.FromSequenceNr, toSeqNr, rtm.Max, taggedMessage =>
+                            var res = ReplayTaggedMessagesAsync(rtm.Tag, rtm.FromSequenceNr, toSeqNr, rtm.Max, taggedMessage =>
                             {
                                 AdaptFromJournal(taggedMessage.Persistent).ForEach(adaptedPersistentRepr =>
                                 {
-                                    rtm.ReplyTo.Tell(new ReplayedTaggedMessage(adaptedPersistentRepr, rtm.Tag,
-                                        taggedMessage.Offset));
+                                    rtm.ReplyTo.Tell(
+                                        new ReplayedTaggedMessage(adaptedPersistentRepr, rtm.Tag, taggedMessage.Offset),
+                                        ActorRefs.NoSender);
                                 });
-                            }).Wait();
+                            }).ContinueWith(t => highSeqNr, TaskContinuationOptions.OnlyOnRanToCompletion);
 
-                            return highSeqNr;
+                            return res.Result;
                         }
                     }).ContinueWith<IJournalResponse>(task =>
                     {
-                        if (!task.IsFaulted && !task.IsCanceled)
+                        if (task.IsCompleted)
                             return new RecoverySuccess(task.Result);
                         else
                             return new ReplayMessagesFailure(task.Exception);
@@ -224,7 +225,7 @@ namespace Akka.Persistence.RocksDb.Journal
 
             WithIterator(iter =>
             {
-                var startKey = new Key(tagInt, fromSequenceNr < 1L ? 1L : fromSequenceNr, 0);
+                var startKey = new Key(tagInt, fromSequenceNr < 1L ? 1L : fromSequenceNr + 1, 0);
                 iter.Seek(KeyToBytes(startKey));
                 Go(iter, startKey, 0L, recoveryCallback);
 
@@ -456,19 +457,19 @@ namespace Akka.Persistence.RocksDb.Journal
 
         private void NotifyPersistenceIdChange(string persistenceId)
         {
-            if (persistenceIdSubscribers.ContainsKey(persistenceId))
+            if (persistenceIdSubscribers.TryGetValue(persistenceId, out var subscribers))
             {
                 var changed = new EventAppended(persistenceId);
-                persistenceIdSubscribers[persistenceId].ForEach(s => s.Tell(changed));
+                subscribers.ForEach(s => s.Tell(changed));
             }
         }
 
         private void NotifyTagChange(string tag)
         {
-            if (tagSubscribers.ContainsKey(tag))
+            if (tagSubscribers.TryGetValue(tag, out var subscribers))
             {
                 var changed = new TaggedEventAppended(tag);
-                tagSubscribers[tag].ForEach(s => s.Tell(changed));
+                subscribers.ForEach(s => s.Tell(changed));
             }
         }
 
@@ -497,14 +498,6 @@ namespace Akka.Persistence.RocksDb.Journal
             lock (_idMapLock)
             {
                 return _idMap.TryGetValue(id, out int v) ? v : WriteIdMapping(id, _idMap.Count + IdOffset);
-            }
-        }
-
-        private bool IsNewPersistenceId(string id)
-        {
-            lock (_idMapLock)
-            {
-                return !_idMap.ContainsKey(id);
             }
         }
 

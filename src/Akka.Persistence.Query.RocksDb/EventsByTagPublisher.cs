@@ -202,7 +202,7 @@ namespace Akka.Persistence.Query.RocksDb
         protected override void ReceiveIdleRequest()
         {
             Buffer.DeliverBuffer(TotalDemand);
-            if (Buffer.IsEmpty && CurrentOffset > ToOffset)
+            if (Buffer.IsEmpty && CurrentOffset >= ToOffset)
                 OnCompleteThenStop();
             else
                 Self.Tell(EventsByTagPublisher.Continue.Instance);
@@ -214,7 +214,7 @@ namespace Akka.Persistence.Query.RocksDb
             if (highestSequenceNr < ToOffset)
                 ToOffset = highestSequenceNr;
 
-            if (Buffer.IsEmpty && (CurrentOffset > ToOffset || CurrentOffset == FromOffset))
+            if (Buffer.IsEmpty && (CurrentOffset >= ToOffset || CurrentOffset == FromOffset))
                 OnCompleteThenStop();
             else
                 Self.Tell(EventsByTagPublisher.Continue.Instance); // more to fetch
