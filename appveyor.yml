@@ -2,5 +2,8 @@ version: 1.0.{build}
 image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
+artifacts:
+- path: build/nuget
+  name: nuget
 build_script:
 - cmd: build.cmd Build
