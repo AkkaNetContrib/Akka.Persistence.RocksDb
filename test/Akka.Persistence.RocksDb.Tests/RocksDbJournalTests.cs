@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using Akka.Configuration;
-using Akka.Persistence.TestKit.Journal;
+using Akka.Persistence.TCK.Journal;
 using Akka.Util.Internal;
 
 namespace Akka.Persistence.RocksDB.Tests

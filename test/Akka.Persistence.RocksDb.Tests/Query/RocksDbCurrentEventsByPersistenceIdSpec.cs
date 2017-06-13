@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace Akka.Persistence.RocksDb.Tests.Query
 {
-    public class RocksDbEventsByPersistenceIdSpec : EventsByPersistenceIdSpec
+    public class RocksDbCurrentEventsByPersistenceIdSpec : CurrentEventsByPersistenceIdSpec
     {
         public static readonly AtomicCounter Counter = new AtomicCounter(0);
 
@@ -18,13 +18,13 @@ namespace Akka.Persistence.RocksDb.Tests.Query
                 class = ""Akka.Persistence.RocksDb.Journal.RocksDbJournal, Akka.Persistence.RocksDb""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
                 auto-initialize = on
-                path = rocks_ebpid_{id}.db
+                path = rocks_cebpid_{id}.db
             }}
             akka.test.single-expect-default = 3s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());
 
-        public RocksDbEventsByPersistenceIdSpec(ITestOutputHelper output) 
-            : base(Config(Counter.GetAndIncrement()), nameof(RocksDbEventsByPersistenceIdSpec), output)
+        public RocksDbCurrentEventsByPersistenceIdSpec(ITestOutputHelper output) 
+            : base(Config(Counter.GetAndIncrement()), nameof(RocksDbCurrentEventsByPersistenceIdSpec), output)
         {
             ReadJournal = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
         }

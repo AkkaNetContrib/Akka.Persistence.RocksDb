@@ -1,13 +1,13 @@
 ﻿using Akka.Configuration;
-using Akka.Persistence.Query;
 using Akka.Persistence.Query.RocksDb;
-using Akka.Persistence.TCK.Query;
+using Akka.Persistence.RocksDb.Tests.Query;
+using Akka.Persistence.TestKit.Performance;
 using Akka.Util.Internal;
 using Xunit.Abstractions;
 
-namespace Akka.Persistence.RocksDb.Tests.Query
+namespace Akka.Persistence.RocksDb.Tests
 {
-    public class RocksDbEventsByPersistenceIdSpec : EventsByPersistenceIdSpec
+    public class RocksDbJournalPerfSpec : JournalPerfSpec
     {
         public static readonly AtomicCounter Counter = new AtomicCounter(0);
 
@@ -18,15 +18,14 @@ namespace Akka.Persistence.RocksDb.Tests.Query
                 class = ""Akka.Persistence.RocksDb.Journal.RocksDbJournal, Akka.Persistence.RocksDb""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
                 auto-initialize = on
-                path = rocks_ebpid_{id}.db
+                path = rocks_perf_{id}.db
             }}
             akka.test.single-expect-default = 3s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());
 
-        public RocksDbEventsByPersistenceIdSpec(ITestOutputHelper output) 
-            : base(Config(Counter.GetAndIncrement()), nameof(RocksDbEventsByPersistenceIdSpec), output)
+        public RocksDbJournalPerfSpec(ITestOutputHelper output) 
+            : base(Config(Counter.GetAndIncrement()), nameof(RocksDbPersistenceIdsSpec), output)
         {
-            ReadJournal = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
         }
     }
 }

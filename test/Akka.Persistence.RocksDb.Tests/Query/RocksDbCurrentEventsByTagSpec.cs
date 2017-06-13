@@ -1,13 +1,13 @@
 ﻿using Akka.Configuration;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.RocksDb;
-using Akka.Persistence.TCK.Query;
 using Akka.Util.Internal;
 using Xunit.Abstractions;
+using Akka.Persistence.TCK.Query;
 
 namespace Akka.Persistence.RocksDb.Tests.Query
 {
-    public class RocksDbEventsByPersistenceIdSpec : EventsByPersistenceIdSpec
+    public class RocksDbCurrentEventsByTagSpec : CurrentEventsByTagSpec
     {
         public static readonly AtomicCounter Counter = new AtomicCounter(0);
 
@@ -15,16 +15,23 @@ namespace Akka.Persistence.RocksDb.Tests.Query
             akka.loglevel = INFO
             akka.persistence.journal.plugin = ""akka.persistence.journal.rocksdb""
             akka.persistence.journal.rocksdb {{
+                event-adapters {{
+                  color-tagger  = ""Akka.Persistence.TCK.Query.ColorFruitTagger, Akka.Persistence.TCK""
+                }}
+                event-adapter-bindings = {{
+                  ""System.String"" = color-tagger
+                }}
                 class = ""Akka.Persistence.RocksDb.Journal.RocksDbJournal, Akka.Persistence.RocksDb""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
                 auto-initialize = on
-                path = rocks_ebpid_{id}.db
+                path = rocks_ctag_{id}.db
             }}
             akka.test.single-expect-default = 3s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());
 
-        public RocksDbEventsByPersistenceIdSpec(ITestOutputHelper output) 
-            : base(Config(Counter.GetAndIncrement()), nameof(RocksDbEventsByPersistenceIdSpec), output)
+
+        public RocksDbCurrentEventsByTagSpec(ITestOutputHelper output) 
+            : base(Config(Counter.GetAndIncrement()), nameof(RocksDbCurrentEventsByTagSpec), output)
         {
             ReadJournal = Sys.ReadJournalFor<RocksDbReadJournal>(RocksDbReadJournal.Identifier);
         }
