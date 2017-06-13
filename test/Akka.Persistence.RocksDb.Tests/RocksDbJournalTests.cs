@@ -18,7 +18,7 @@ namespace Akka.Persistence.RocksDB.Tests
 
         private static Config CreateSpecConfig()
         {
-            var name = $"rocks{Counter.IncrementAndGet()}.db";
+            var name = $"rocks_journal_{Counter.GetAndIncrement()}.db";
 
             return ConfigurationFactory.ParseString($@"
                 akka.test.single-expect-default = 3s

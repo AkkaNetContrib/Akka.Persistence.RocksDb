@@ -18,7 +18,7 @@ namespace Akka.Persistence.RocksDb.Tests
                 class = ""Akka.Persistence.RocksDb.Journal.RocksDbJournal, Akka.Persistence.RocksDb""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
                 auto-initialize = on
-                path = rocks_pid_{id}.db
+                path = rocks_ser_{id}.db
             }}
             akka.test.single-expect-default = 3s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());

@@ -130,7 +130,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\RocksDbPersistenceIdsSpec.cs" />
     <Compile Include="RocksDbJournalTests.cs" />
-    <Compile Include="TestKit\TestActor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
