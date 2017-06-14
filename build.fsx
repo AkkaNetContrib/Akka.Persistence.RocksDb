@@ -69,7 +69,7 @@ Target "RunTests" (fun _ ->
 Target "CreateNuget" (fun _ ->
     let versionSuffix = getBuildParamOrDefault "versionsuffix" ""
 
-    let projects = !! "src/**/Akka.Persistence.RocksDb.csproj" ++ "src/**/Akka.Persistence.Query.RocksDb.csproj"
+    let projects = !! "src/**/Akka.Persistence.RocksDb.csproj"
 
     let runSingleProject project =
         DotNetCli.Pack

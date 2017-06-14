@@ -150,9 +150,6 @@
       <Name>Akka.Persistence.RocksDb.Vs2015</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="RocksDbNative.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
