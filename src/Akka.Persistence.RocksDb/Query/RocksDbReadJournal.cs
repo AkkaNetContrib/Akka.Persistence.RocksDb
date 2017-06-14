@@ -23,7 +23,7 @@ namespace Akka.Persistence.Query.RocksDb
 
         public static Config DefaultConfiguration()
         {
-           return ConfigurationFactory.FromResource<RocksDbReadJournal>("Akka.Persistence.Query.RocksDb.reference.conf");
+           return ConfigurationFactory.FromResource<RocksDbReadJournal>("Akka.Persistence.RocksDb.reference.conf");
         }
 
         public RocksDbReadJournal(ExtendedActorSystem system, Config config)

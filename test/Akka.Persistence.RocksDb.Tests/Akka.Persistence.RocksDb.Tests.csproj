@@ -8,7 +8,6 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Akka.Persistence.RocksDb\Akka.Persistence.RocksDb.csproj" />
-    <ProjectReference Include="..\..\src\Akka.Persistence.Query.RocksDb\Akka.Persistence.Query.RocksDb.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +26,7 @@
     <PackageReference Include="Akka.Persistence.TCK" Version="1.3.0-*" />
     <PackageReference Include="Akka.TestKit.Xunit2" Version="1.3.0-*" />
     <PackageReference Include="Akka.Streams.TestKit" Version="1.3.0-*" />
+    <PackageReference Include="RocksDbNative" Version="5.4.6" />
   </ItemGroup>
 
   <ItemGroup>
