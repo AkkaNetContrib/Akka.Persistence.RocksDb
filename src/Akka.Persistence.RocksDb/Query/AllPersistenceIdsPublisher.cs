@@ -2,7 +2,7 @@
 using Akka.Persistence.RocksDb.Journal;
 using Akka.Streams.Actors;
 
-namespace Akka.Persistence.Query.RocksDb
+namespace Akka.Persistence.RocksDb.Query
 {
     public class AllPersistenceIdsPublisher : ActorPublisher<string>
     {

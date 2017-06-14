@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Dispatch;
 using Akka.Persistence.Journal;
-using Akka.Persistence.RocksDB;
 using Akka.Serialization;
 using Akka.Util.Internal;
 using RocksDbSharp;

@@ -1,6 +1,6 @@
 ﻿using Akka.Configuration;
 using Akka.Persistence.Query;
-using Akka.Persistence.Query.RocksDb;
+using Akka.Persistence.RocksDb.Query;
 using Akka.Persistence.TCK.Query;
 using Akka.Util.Internal;
 using Xunit.Abstractions;

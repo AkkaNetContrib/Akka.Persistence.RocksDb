@@ -1,7 +1,8 @@
 ﻿using Akka.Actor;
 using Akka.Configuration;
+using Akka.Persistence.Query;
 
-namespace Akka.Persistence.Query.RocksDb
+namespace Akka.Persistence.RocksDb.Query
 {
     public class RocksDbReadJournalProvider : IReadJournalProvider
     {

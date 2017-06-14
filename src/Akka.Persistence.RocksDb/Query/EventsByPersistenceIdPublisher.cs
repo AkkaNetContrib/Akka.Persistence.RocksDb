@@ -1,10 +1,11 @@
 using System;
 using Akka.Actor;
 using Akka.Event;
+using Akka.Persistence.Query;
 using Akka.Persistence.RocksDb.Journal;
 using Akka.Streams.Actors;
 
-namespace Akka.Persistence.Query.RocksDb
+namespace Akka.Persistence.RocksDb.Query
 {
     public class EventsByPersistenceIdPublisher
     {

@@ -8,7 +8,7 @@ using System;
 using Akka.Actor;
 using Akka.Configuration;
 
-namespace Akka.Persistence.RocksDB
+namespace Akka.Persistence.RocksDb
 {
     public class RocksDbSettings
     {

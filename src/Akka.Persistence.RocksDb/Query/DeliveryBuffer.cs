@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Akka.Persistence.Query.RocksDb
+namespace Akka.Persistence.RocksDb.Query
 {
     internal class DeliveryBuffer<T>
     {

@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{95B4FE90-1797-4F13-B99C-FA79C3F45995}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{73F6ED0B-CF68-4976-9B3B-B4472ABB0CEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Persistence.RocksDb.Tests", "test\Akka.Persistence.RocksDb.Tests\Akka.Persistence.RocksDb.Tests.Vs2015.csproj", "{A9027DC5-A031-4358-8CDF-0DA259918EBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Akka.Persistence.RocksDb", "src\Akka.Persistence.RocksDb\Akka.Persistence.RocksDb.Vs2015.csproj", "{1F9836F0-0134-4CD2-9561-4315B31C73AA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C1610FA6-216A-420E-B494-717EBDFF1F63}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Debug|x64.Build.0 = Debug|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Release|x64.ActiveCfg = Release|Any CPU
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB}.Release|x64.Build.0 = Release|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A9027DC5-A031-4358-8CDF-0DA259918EBB} = {73F6ED0B-CF68-4976-9B3B-B4472ABB0CEA}
+		{1F9836F0-0134-4CD2-9561-4315B31C73AA} = {95B4FE90-1797-4F13-B99C-FA79C3F45995}
+	EndGlobalSection
+EndGlobal

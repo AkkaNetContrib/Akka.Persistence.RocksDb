@@ -1,5 +1,5 @@
 ﻿using Akka.Configuration;
-using Akka.Persistence.Query.RocksDb;
+using Akka.Persistence.RocksDb.Query;
 using Akka.Persistence.RocksDb.Tests.Query;
 using Akka.Persistence.TestKit.Performance;
 using Akka.Util.Internal;

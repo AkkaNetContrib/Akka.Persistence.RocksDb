@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Text;
 using Akka.Actor;
 using Akka.Configuration;
+using Akka.Persistence.Query;
 using Akka.Streams.Dsl;
 
-namespace Akka.Persistence.Query.RocksDb
+namespace Akka.Persistence.RocksDb.Query
 {
     public class RocksDbReadJournal : 
         IReadJournal,
