@@ -155,7 +155,7 @@ akka.persistence.query.journal.rocksdb {
 
 ## Serialization
 Are messages are serialized using [MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp). If you want to change the serialization format, you should change HOCON settings
-
+```
 akka.actor {
   serializers {
     rocksdb = "Akka.Serialization.YourOwnSerializer, YourOwnSerializer"
@@ -165,3 +165,4 @@ akka.actor {
     "Akka.YourOwnType, YourOwnAssembly" = rocksdb
   }
 }
+```
