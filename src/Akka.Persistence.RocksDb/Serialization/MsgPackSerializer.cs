@@ -4,6 +4,7 @@ using Akka.Serialization;
 using Akka.Util;
 using MessagePack;
 using MessagePack.Resolvers;
+using System.Reflection;
 
 namespace Akka.Persistence.RocksDb.Serialization
 {

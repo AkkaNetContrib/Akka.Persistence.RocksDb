@@ -154,4 +154,14 @@ akka.persistence.query.journal.rocksdb {
 ```
 
 ## Serialization
-Are messages are serialized using the default `Akka.Persistence` serializer for `IPersistentRepresentation` type. It could be changed in future releases.
+Are messages are serialized using [MessagePack-CSharp](https://github.com/neuecc/MessagePack-CSharp). If you want to change the serialization format, you should change HOCON settings
+
+akka.actor {
+  serializers {
+    rocksdb = "Akka.Serialization.YourOwnSerializer, YourOwnSerializer"
+  }
+  serialization-bindings {
+    "Akka.Persistence.IPersistentRepresentation, Akka.Persistence" = rocksdb
+    "Akka.YourOwnType, YourOwnAssembly" = rocksdb
+  }
+}
