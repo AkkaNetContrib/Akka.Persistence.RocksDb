@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Dispatch;
 using Akka.Persistence.Journal;
-using Akka.Serialization;
 using Akka.Util.Internal;
 using RocksDbSharp;
 using static Akka.Persistence.RocksDb.Journal.RocksDbKey;
@@ -17,8 +16,9 @@ namespace Akka.Persistence.RocksDb.Journal
 {
     public sealed class RocksDbJournal : AsyncWriteJournal
     {
+        private ActorSystem _system;
+
         internal RocksDbSettings Settings { get; } = RocksDbPersistence.Get(Context.System).JournalSettings;
-        internal Serializer Serializer { get; } = Context.System.Serialization.FindSerializerFor(typeof(Serialization.IMessage));
 
         internal DbOptions RocksDbOptions { get; } = new DbOptions().SetCreateIfMissing(true);
         internal ReadOptions RocksDbReadOptions { get; }
@@ -34,6 +34,7 @@ namespace Akka.Persistence.RocksDb.Journal
 
         public RocksDbJournal()
         {
+            _system = Context.System;
             RocksDbReadOptions = new ReadOptions().SetVerifyChecksums(Settings.Checksum);
             RocksDbWriteOptions = new WriteOptions().SetSync(Settings.FSync);
         }
@@ -369,9 +370,17 @@ namespace Akka.Persistence.RocksDb.Journal
             }
         }
 
-        private byte[] PersistentToBytes(IPersistentRepresentation p) => Serializer.ToBinary(p);
+        private byte[] PersistentToBytes(IPersistentRepresentation message)
+        {
+            var serializer = _system.Serialization.FindSerializerForType(typeof(IPersistentRepresentation));
+            return serializer.ToBinary(message);
+        }
 
-        private IPersistentRepresentation PersistentFromBytes(byte[] a) => Serializer.FromBinary<IPersistentRepresentation>(a);
+        private IPersistentRepresentation PersistentFromBytes(byte[] bytes)
+        {
+            var serializer = _system.Serialization.FindSerializerForType(typeof(IPersistentRepresentation));
+            return serializer.FromBinary<IPersistentRepresentation>(bytes);
+        }
 
         private void AddToMessageBatch(IPersistentRepresentation persistent, HashSet<string> tags, WriteBatch batch)
         {

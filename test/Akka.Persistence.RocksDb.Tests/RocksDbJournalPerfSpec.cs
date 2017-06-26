@@ -20,6 +20,7 @@ namespace Akka.Persistence.RocksDb.Tests
                 auto-initialize = on
                 path = rocks_perf_{id}.db
             }}
+            akka.actor.serialization-bindings.""Akka.Persistence.TestKit.Performance.Cmd, Akka.Persistence.TCK"" = msgpack
             akka.test.single-expect-default = 3s")
             .WithFallback(RocksDbReadJournal.DefaultConfiguration());
 

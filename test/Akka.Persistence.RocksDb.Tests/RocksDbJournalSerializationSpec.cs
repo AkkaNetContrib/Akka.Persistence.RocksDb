@@ -3,6 +3,7 @@ using Akka.Persistence.RocksDb.Query;
 using Akka.Persistence.RocksDb.Tests.Query;
 using Akka.Persistence.TCK.Serialization;
 using Akka.Util.Internal;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Akka.Persistence.RocksDb.Tests
@@ -21,10 +22,16 @@ namespace Akka.Persistence.RocksDb.Tests
                 path = rocks_ser_{id}.db
             }}
             akka.test.single-expect-default = 3s")
-            .WithFallback(RocksDbReadJournal.DefaultConfiguration());
+            .WithFallback(RocksDbReadJournal.DefaultConfiguration()
+            .WithFallback(Persistence.DefaultConfig()));
 
         public RocksDbJournalSerializationSpec(ITestOutputHelper output) 
             : base(Config(Counter.GetAndIncrement()), nameof(RocksDbPersistenceIdsSpec), output)
+        {
+        }
+
+        [Fact(Skip = "EventAdapters are not supported in RocksDb plugin")]
+        public override void Journal_should_serialize_Persistent_with_EventAdapter_manifest()
         {
         }
     }
