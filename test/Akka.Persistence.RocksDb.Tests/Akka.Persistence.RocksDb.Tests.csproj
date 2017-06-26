@@ -26,7 +26,7 @@
     <PackageReference Include="Akka.Persistence.TCK" Version="1.3.0-*" />
     <PackageReference Include="Akka.TestKit.Xunit2" Version="1.3.0-*" />
     <PackageReference Include="Akka.Streams.TestKit" Version="1.3.0-*" />
-    <PackageReference Include="RocksDbNative" Version="5.4.6" />
+    <PackageReference Include="RocksDbNative" Version="5.4.6.9" />
   </ItemGroup>
 
   <ItemGroup>
