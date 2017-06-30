@@ -1,6 +1,6 @@
 # Akka.Persistence.RocksDb
 
-[![Build status](https://ci.appveyor.com/api/projects/status/swji9deq1pt89o2h/branch/master?svg=true)](https://ci.appveyor.com/project/ravengerUA/akka-persistence-rocksdb/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/emu7p6xn56y8ra0e/branch/master?svg=true)](https://ci.appveyor.com/project/akkadotnet-contrib/akka-persistence-rocksdb/branch/master)
 
 Akka Persistence journal store backed by RocksDB embedded database. This is an alpha version; currently it is more of an experiment with RocksDB. It uses [rocksdb-sharp](https://github.com/warrenfalk/rocksdb-sharp) package.
 
