@@ -115,7 +115,7 @@ namespace Akka.Persistence.RocksDb.Query
                     case ReplayedMessage replayed:
                         var seqNr = replayed.Persistent.SequenceNr;
                         Buffer.Add(new EventEnvelope(
-                            offset: seqNr,
+                            offset: new Sequence(seqNr), 
                             persistenceId: PersistenceId,
                             sequenceNr: seqNr,
                             @event: replayed.Persistent.Payload));
