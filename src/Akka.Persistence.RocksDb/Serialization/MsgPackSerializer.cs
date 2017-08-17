@@ -49,7 +49,7 @@ namespace Akka.Persistence.RocksDb.Serialization
         {
             CompositeResolver.RegisterAndSetAsDefault(
                 ActorPathResolver.Instance,
-                ContractlessStandardResolver.Instance);
+                TypelessContractlessStandardResolver.Instance);
         }
 
         public MsgPackSerializer(ExtendedActorSystem system) : base(system)

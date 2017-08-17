@@ -3,13 +3,15 @@
   <PropertyGroup>
     <AssemblyTitle>Akka.Persistence.RocksDb</AssemblyTitle>
     <Description>Akka.NET Persistence journal and snapshot store backed by RocksDb.</Description>
-    <Copyright>Copyright © 2017 Alex Valuyskyi</Copyright>
-    <VersionPrefix>0.5.1</VersionPrefix>
-    <Authors>Alex Valuyskyi</Authors>
+    <Copyright>Copyright © 2017 Akka.NET Contrib</Copyright>
+    <VersionPrefix>0.9.0</VersionPrefix>
+    <Authors>Akka.NET Contrib</Authors>
     <TargetFrameworks>net461;netstandard1.6</TargetFrameworks>
     <PackageTags>akka;actors;actor model;Akka;concurrency;persistence;eventsource;query;rocksdb</PackageTags>
+    <PackageIconUrl>http://getakka.net/images/akkalogo.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/AkkaNetContrib/Akka.Persistence.RocksDb</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/AkkaNetContrib/Akka.Persistence.RocksDb/blob/dev/LICENSE</PackageLicenseUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.6' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,11 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Akka" Version="1.3.0-*" />
-    <PackageReference Include="Akka.Persistence" Version="1.3.0-*" />
-    <PackageReference Include="Akka.Persistence.Query" Version="1.3.0-*" />
-    <PackageReference Include="Akka.Streams" Version="1.3.0-*" />
-    <PackageReference Include="MessagePack" Version="1.3.2" />
+    <PackageReference Include="Akka" Version="1.3.0" />
+    <PackageReference Include="Akka.Persistence" Version="1.3.0" />
+    <PackageReference Include="Akka.Persistence.Query" Version="1.3.0" />
+    <PackageReference Include="Akka.Streams" Version="1.3.0" />
+    <PackageReference Include="MessagePack" Version="1.4.4" />
     <PackageReference Include="RocksDbSharp" Version="5.4.6.9" />
     <PackageReference Include="System.ValueTuple" Version="4.3.1" />
   </ItemGroup>
