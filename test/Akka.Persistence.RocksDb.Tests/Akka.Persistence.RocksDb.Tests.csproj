@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyTitle>Akka.Persistence.RocksDb</AssemblyTitle>
+    <AssemblyTitle>Akka.Persistence.RocksDb.Tests</AssemblyTitle>
     <TargetFrameworks>net461</TargetFrameworks>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net461' ">win7-x64</RuntimeIdentifier>
-    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">$(PackageTargetFallback);portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
   
   <ItemGroup>
